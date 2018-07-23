@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackMapper">
+	<delete  id="cancleRequestExercise" parameterType="String">
+		DELETE FROM exercise_feedback_request WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+	</delete>
+	<select id="memberNoSearchCount" resultType="Integer">
+	SELECT 
+	count(*)
+	FROM member
+	WHERE member_no = #{memberNo}
+	</select>
+	<select id="exerciseFeedbackRequestListSearchCount" parameterType="map" 
+			resultType="Integer">
+		SELECT 
+			Count(*)
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo}
+					<if test="keyOption == 'memberName'"> 
+						 AND member_name like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+				</if>
+				<if test="sessionLevel == 4">
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.teacher_no = #{memberNo}
+					<if test="keyOption == 'memberId'"> 
+						 AND b.member_id like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+					</if>
+				<if test="sessionLevel == 3">
+						FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo} 
+					<if test="keyOption == 'memberName'"> 
+						 AND b.member_name like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+				</if>
+			</when>
+			<when test="sessionLevel == 1">
+				FROM exercise_feedback_request a
+				<if test="keyOption == 'memberNo'"> 
+					 WHERE a.member_no like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'teacherNo'"> 
+					 WHERE a.teacher_no like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+					WHERE a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'exerciseFeedbackRequestNo'">
+					WHERE a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+				</if>
+			</when>
+		</choose>
+	</select>
+	<select id="exerciseFeedbackRequestListSearch" 
+		resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,  
+			a.exercise_feedback_request_title as exerciseFeedbackRequestTitle, 
+			a.exercise_feedback_request_date as exerciseFeedbackRequestDate,
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo}
+					<if test="keyOption == 'memberName'"> 
+						 AND member_name like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+				</if>
+				<if test="sessionLevel == 4">
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.teacher_no = #{memberNo}
+					<if test="keyOption == 'memberId'"> 
+						 AND b.member_id like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+				</if>
+				<if test="sessionLevel == 3">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+						FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo} 
+					<if test="keyOption == 'memberName'"> 
+						 AND b.member_name like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+						AND a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+					</if> 
+					<if test="keyOption == 'exerciseFeedbackRequestNo'">
+						AND a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+					</if>
+				</if>
+			</when>
+			<when test="sessionLevel == 1">
+				a.member_no as memberNo,
+				a.teacher_no as teacherNo
+				FROM exercise_feedback_request a
+				<if test="keyOption == 'memberNo'"> 
+					 WHERE a.member_no like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'teacherNo'"> 
+					 WHERE a.teacher_no like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'exerciseFeedbackRequestTitle'"> 
+					WHERE a.exercise_feedback_request_title like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'exerciseFeedbackRequestNo'">
+					WHERE a.exercise_feedback_request_no like CONCAT('%', #{keyWord}, '%') 
+				</if>
+			</when>
+		</choose>
+		ORDER BY exercise_feedback_request_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+
+	<select id="exerciseFeedbackPtListSearch" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			a.member_name as memberName,
+			a.member_id as memberId,
+			b.member_no as memberNo,
+			b.member_work_space as memberWorkSpace, 
+			b.member_total_feedback as memberTotalFeedback,
+			b.member_agree_feedback as memberAgreeFeedback, 
+			b.evaluation_average_grade as evaluationAverageGrade
+		FROM member a
+		INNER JOIN member_teacher b
+		ON a.member_no = b.member_no
+		WHERE feedback_availablilty = 'T'
+		<choose>
+			<when test="keyOption == 'memberName'"> 
+				AND member_name like CONCAT('%', #{keyWord}, '%') 
+			</when> 
+			<when test="keyOption == 'memberId'"> 
+				AND member_id like CONCAT('%', #{keyWord}, '%') 
+			</when> 
+			<when test="keyOption == 'evaluationAverageGrade'">
+				AND evaluation_average_grade like CONCAT('%', #{keyWord}, '%') 
+			</when>
+		</choose> 
+		ORDER BY member_approval_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="exerciseFeedbackApprovalList" parameterType="map"
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+				SELECT 
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,  
+			a.exercise_feedback_request_title as exerciseFeedbackRequestTitle, 
+			a.exercise_feedback_request_date as exerciseFeedbackRequestDate,
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName,
+						c.exercise_feedback_result as exerciseFeedbackResult,
+						c.exercise_feedback_approval as exerciseFeedbackApproval,
+						c.exercise_feedback_approval_date as exerciseFeedbackApprovalDate
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					INNER JOIN exercise_feedback_approval_result c
+					ON a.exercise_feedback_request_no = c.exercise_feedback_request_no
+					WHERE a.member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+						b.member_id as memberId,
+						b.member_name as memberName,
+						c.exercise_feedback_result as exerciseFeedbackResult,
+						c.exercise_feedback_approval as exerciseFeedbackApproval,
+						c.exercise_feedback_approval_date as exerciseFeedbackApprovalDate
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					INNER JOIN exercise_feedback_approval_result c
+					ON a.exercise_feedback_request_no = c.exercise_feedback_request_no
+					WHERE a.teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName,
+						c.exercise_feedback_result as exerciseFeedbackResult,
+						c.exercise_feedback_approval as exerciseFeedbackApproval,
+						c.exercise_feedback_approval_date as exerciseFeedbackApprovalDate
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					INNER JOIN exercise_feedback_approval_result c
+					ON a.exercise_feedback_request_no = c.exercise_feedback_request_no
+					WHERE a.member_no = #{memberNo}
+				</if>
+			</when>
+			<when test="sessionLevel == 1">
+					a.member_no as memberNo,
+					a.teacher_no as teacherNo,
+					c.exercise_feedback_result as exerciseFeedbackResult,
+					c.exercise_feedback_approval as exerciseFeedbackApproval,
+					c.exercise_feedback_approval_date as exerciseFeedbackApprovalDate
+				FROM exercise_feedback_request a
+				INNER JOIN exercise_feedback_approval_result c
+				ON a.exercise_feedback_request_no = c.exercise_feedback_request_no
+			</when>
+		</choose>		
+		ORDER BY exercise_feedback_approval_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+
+	<select id="exerciseFeedbackListSearchDate" parameterType="map"
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+				SELECT 
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,  
+			a.exercise_feedback_request_title as exerciseFeedbackRequestTitle, 
+			a.exercise_feedback_request_date as exerciseFeedbackRequestDate,
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo}
+					AND exercise_feedback_request_date >= #{startDate} AND #{endDate} > exercise_feedback_request_date
+				</if>
+				<if test="sessionLevel == 4">
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.teacher_no = #{memberNo}
+					AND exercise_feedback_request_date >= #{startDate} AND #{endDate} > exercise_feedback_request_date
+				</if>
+				<if test="sessionLevel == 3">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+						FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.member_no = #{memberNo} 
+					AND exercise_feedback_request_date >= #{startDate} AND #{endDate} > exercise_feedback_request_date
+				</if>
+			</when>
+			<when test="sessionLevel == 1">
+				a.member_no as memberNo,
+				a.teacher_no as teacherNo
+				FROM exercise_feedback_request a
+				WHERE exercise_feedback_request_date >= #{startDate} AND #{endDate} > exercise_feedback_request_date
+			</when>
+		</choose>		
+		ORDER BY exercise_feedback_request_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="exerciseFeedbackApprovalResult" 
+				parameterType="String" 
+				resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			exercise_feedback_approval as exerciseFeedbackApproval, 
+			exercise_feedback_result as exerciseFeedbackResult,
+			exercise_feedback_approval_date as exerciseFeedbackApprovalDate
+		FROM exercise_feedback_approval_result
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}	
+	</select>
+	<select id="exerciseFeedbackApprovalresultTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_approval_result
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+	</select>
+	<insert id="feedbackapprovalDenied" 
+		parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		INSERT INTO exercise_feedback_approval_result(
+		exercise_feedback_request_no, exercise_feedback_approval, exercise_feedback_result, exercise_feedback_approval_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, '거절', '거절', NOW()
+		)
+	</insert>
+	<insert id="feedbackapprovalAccept" 
+	parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		INSERT INTO exercise_feedback_approval_result(
+		exercise_feedback_request_no, exercise_feedback_approval, exercise_feedback_result, exercise_feedback_approval_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, '수락', '대기', NOW()
+		)
+	</insert>
+	<select id="nextExerciseFeedbackDetailCount" parameterType="map"  resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_request
+		WHERE exercise_feedback_request_no > #{exerciseFeedbackRequestNo}
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					AND member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+					AND teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					AND member_no = #{memberNo}
+				</if>
+			</when>
+		</choose>
+		 ORDER BY exercise_feedback_request_no ASC LIMIT 1
+	</select>
+	<select id="prevExerciseFeedbackDetail" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			exercise_feedback_request_no as exerciseFeedbackRequestNo, 
+			exercise_feedback_request_title as exerciseFeedbackRequestTitle
+		FROM exercise_feedback_request
+		 WHERE #{exerciseFeedbackRequestNo} > exercise_feedback_request_no
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					AND member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+					AND teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					AND member_no = #{memberNo}
+				</if>
+			</when>
+		</choose>
+		 ORDER BY exercise_feedback_request_no DESC LIMIT 1
+	</select>
+	<select id="prevExerciseFeedbackDetailCount" parameterType="map"  resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_request
+		WHERE #{exerciseFeedbackRequestNo} > exercise_feedback_request_no
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					AND member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+					AND teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					AND member_no = #{memberNo}
+				</if>
+			</when>
+		</choose>
+		 ORDER BY exercise_feedback_request_no DESC LIMIT 1
+	</select>
+	<select id="nextExerciseFeedbackDetail" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			exercise_feedback_request_no as exerciseFeedbackRequestNo, 
+			exercise_feedback_request_title as exerciseFeedbackRequestTitle
+		FROM exercise_feedback_request
+		WHERE exercise_feedback_request_no > #{exerciseFeedbackRequestNo}
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					AND member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+					AND teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					AND member_no = #{memberNo}
+				</if>
+			</when>
+		</choose>
+		 ORDER BY exercise_feedback_request_no ASC LIMIT 1
+	</select>
+	<select id="exerciseFeedbackRequestDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo, 
+			b.member_id as memberId,
+			a.teacher_no as teacherNo,
+			a.member_no as memberNo,
+			b.member_name as memberName, 
+			a.exercise_feedback_request_title as exerciseFeedbackRequestTitle, 
+			a.exercise_feedback_request_content as exerciseFeedbackRequestContent, 
+			a.exercise_feedback_request_date as exerciseFeedbackRequestDate
+		FROM exercise_feedback_request a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+	</select>
+	<select id="exerciseFeedbackRequestNo" resultType="Integer">
+		SELECT
+		IFNULL(MAX(CAST(SUBSTRING(exercise_feedback_request_no,27)as decimal)),0) 
+		FROM exercise_feedback_request
+	</select>
+	<insert id="exerciseFeedbackRequest" parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+	INSERT INTO exercise_feedback_request(
+	exercise_feedback_request_no, member_no, teacher_no, exercise_feedback_request_title, exercise_feedback_request_content, exercise_feedback_request_date)
+	VALUES (
+	#{exerciseFeedbackRequestNo}, #{memberNo}, #{teacherNo}, #{exerciseFeedbackRequestTitle}, #{exerciseFeedbackRequestContent}, NOW()
+	)
+	</insert>
+	<select id="exerciseFeedbackListTotalCount" parameterType="map"  resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_request
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+					 WHERE member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+					WHERE teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+					WHERE member_no = #{memberNo}
+				</if>
+			</when>
+		</choose>
+	</select>
+	<select id="exerciseFeedbackPtSelect" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			member_name as memberName,
+			member_id as memberId,
+			member_no as memberNo
+		FROM member
+		WHERE member_no = #{memberNo}
+	</select>
+	<select id="exerciseFeedbackPtTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM member_teacher
+		WHERE feedback_availablilty = 'T'
+	</select>
+	<select id="exerciseFeedbackPtList" parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			a.member_name as memberName,
+			a.member_id as memberId,
+			b.member_no as memberNo,
+			b.member_work_space as memberWorkSpace, 
+			b.member_total_feedback as memberTotalFeedback,
+			b.member_agree_feedback as memberAgreeFeedback, 
+			b.evaluation_average_grade as evaluationAverageGrade
+		FROM member a
+		INNER JOIN member_teacher b
+		ON a.member_no = b.member_no
+		WHERE feedback_availablilty = 'T'
+		ORDER BY member_approval_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="exerciseFeedbackList" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackRequest">
+		SELECT 
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,  
+			a.exercise_feedback_request_title as exerciseFeedbackRequestTitle, 
+			a.exercise_feedback_request_date as exerciseFeedbackRequestDate,
+		<choose>
+			<when test="sessionLevel != 1">
+				<if test="sessionLevel == 2">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.teacher_no = b.member_no
+					WHERE a.member_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 4">
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.member_no = b.member_no
+					WHERE a.teacher_no = #{memberNo}
+				</if>
+				<if test="sessionLevel == 3">
+						a.member_no as memberNo,
+						a.teacher_no as teacherNo,
+						b.member_id as memberId,
+						b.member_name as memberName
+					FROM exercise_feedback_request a
+					INNER JOIN member b
+					ON a.teacher_no = b.member_no
+					WHERE a.member_no = #{memberNo}
+				</if>
+			</when>
+			<when test="sessionLevel == 1">
+					a.member_no as memberNo,
+					a.teacher_no as teacherNo
+				FROM exercise_feedback_request a
+			</when>
+		</choose>
+		ORDER BY exercise_feedback_request_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.payment.service.PointChargingMapper">
+	<update id="updateMemberPointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	UPDATE member
+	SET
+		member_point = #{memberPoint}
+	WHERE member_no = #{memberNo}
+	</update>
+	<select id="selectMemberPoint" parameterType="String" resultType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	SELECT 
+	member_point as memberPoint
+	FROM member
+	where member_no = #{memberNo}
+	</select>
+	<select id="pointCahrgingSearchMemberNo" parameterType="String" resultType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	SELECT
+	member_no as memberNo,
+	point_charging_sum as pointChargingSum
+	FROM point_charging
+	WHERE point_charging_no = #{pointChargingNo}
+	</select>
+	<delete id="deletePointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	DELETE FROM point_charging 
+	WHERE point_charging_no = #{pointChargingNo}
+	</delete>
+	<select id="pointChargingNoResultCount" resultType="Integer">
+	SELECT
+	count(*)
+	FROM point_charging_approval_result
+	WHERE point_charging_no = #{pointChargingNo}
+	</select>
+	<insert id="deniedPointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	INSERT INTO point_charging_approval_result
+	(point_charging_no, point_charging_director_no, point_charging_approval, point_charging_approval_date)
+	VALUES (
+	#{pointChargingNo}, #{pointChargingDirectorNo}, 'F', NOW()
+	)
+	</insert>
+	<insert id="acceptPointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	INSERT INTO point_charging_approval_result
+	(point_charging_no, point_charging_director_no, point_charging_approval, point_charging_approval_date)
+	VALUES (
+	#{pointChargingNo}, #{pointChargingDirectorNo}, 'T', NOW()
+	)
+	</insert>
+	<select id="pointChargingSum" parameterType="String" resultType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	SELECT
+	point_charging_sum as pointChargingSum
+	FROM point_charging
+	WHERE member_no = #{memberNo}
+	</select>
+	<select id="PointChargingNo" resultType="Integer">
+	SELECT
+	max(CAST(substring(point_charging_no,16) AS DECIMAL))
+	FROM point_charging
+	</select>
+	<update id="updateapprovalResultPointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	UPDATE point_charging
+	SET
+		point_charging_approval_result = 'T'
+	WHERE point_charging_no = #{pointChargingNo}
+	</update>
+	<insert id="addPointCharging" parameterType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	INSERT INTO point_charging(
+	point_charging_no, member_no, point_charging_sum, point_charging_approval_result, point_charging_date
+	)
+	VALUES (
+	#{pointChargingNo}, #{memberNo}, #{pointChargingSum}, 'F', NOW()
+	)
+	</insert>
+	<select id="pointChargingApprovalTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM point_charging_approval_result
+	</select>
+	<select id="pointChargingApprovalList" 
+			parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.payment.service.PointCharging">
+		SELECT  
+		 a.point_charging_approval as pointChargingApproval,
+		 a.point_charging_approval_date as pointChargingApprovalDate,
+		 a.point_charging_director_no as pointChargingDirectorNo,
+		 b.point_charging_sum as pointChargingSum, 
+		 b.point_charging_date as pointChargingDate,
+		 b.point_charging_no as pointChargingNo,
+		 c.member_name as memberName, 
+		 c.member_id as memberId		 
+	FROM point_charging_approval_result a
+	INNER JOIN point_charging b
+	ON a.point_charging_no = b.point_charging_no
+	INNER JOIN member c
+	ON b.member_no = c.member_no
+	ORDER BY point_charging_approval_date DESC
+	LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="pointChargingTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM point_charging
+	</select>
+	<select id="pointChargingList" 
+			parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.payment.service.PointCharging">
+	 	SELECT a.point_charging_no as pointChargingNo, 
+			 b.member_name as memberName, 
+			 b.member_id as memberId,
+			 a.point_charging_sum as pointChargingSum, 
+			 a.point_charging_date as pointChargingDate
+		FROM point_charging a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		WHERE point_charging_approval_result = 'F'
+		ORDER BY point_charging_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+</mapper>

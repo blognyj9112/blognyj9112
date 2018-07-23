@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.group.service.GroupMapper">
+	 <select id="groupKindNo" resultType="Integer">
+		SELECT
+		IFNULL(max(CAST(substring(group_kind_no,12) AS DECIMAL)),0)
+		FROM group_kind
+	</select>
+	<select id="groupKindNoSelect"  parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	SELECT
+		group_kind_no = ${groupKindNo}
+		FROM group_kind
+		WHERE group_kind_name= ${groupKindName}
+	</select>
+	<update id="updateGroupKind" 
+	 parameterType="com.cafe24.blognyj9112.group.service.Group">
+		UPDATE group_kind
+		SET
+			group_kind_name= ${groupKindName}
+		WHERE group_kind_no= ${groupKindNo}
+	</update>
+	<select id="groupKindListTotalCount"
+			resultType="Integer">
+	SELECT
+		Count(*)
+		FROM group_kind
+	</select>
+		<select id="groupKindListSelect" resultType="com.cafe24.blognyj9112.group.service.Group"
+			parameterType="com.cafe24.blognyj9112.group.service.Group">
+	SELECT
+		group_kind_no as groupKindNo,
+		group_kind_name as groupKindName
+		FROM group_kind
+	</select>
+	<select id="groupKindList" parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	SELECT
+		group_kind_no as groupKindNo,
+		group_kind_name as groupKindName
+		FROM group_kind
+		ORDER BY group_kind_no DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<insert id="addGroupKind"  
+	parameterType="com.cafe24.blognyj9112.group.service.Group">
+		INSERT INTO group_kind
+		(group_kind_no, group_kind_name)
+		VALUES (
+		${groupKindNo}, ${groupKindName}
+		)
+	</insert>
+	<select id="groupMemberList" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	SELECT
+		member_no as memberNo
+		FROM group_create
+	WHERE group_no = #{groupNo}
+	</select>
+	<select id="memberNoCreateCheck" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			member_no as memberNo
+		FROM group_create a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		WHERE b.member_id = #{memberId}
+	</select>
+	<select id="memberGroupCreateCheckCount" parameterType="String" 
+			resultType="Integer">
+		SELECT
+			count(*)
+			FROM group_create
+		WHERE member_no = #{memberNo}
+	</select>
+	<select id="memberGroupCreateCheck" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			group_name as groupName
+			FROM group_create
+		WHERE member_no = #{memberNo}
+	</select>
+	<select id="groupNameSearch" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+		 group_name as groupName
+		FROM group_create
+		WHERE group_no = #{groupNo}	
+	</select>
+	<select id="groupNoSearch" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT group_no as groupNo
+		FROM group_create
+		WHERE group_name = #{groupName}
+	</select>
+	<select id="nextGroupCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create
+		WHERE group_no > #{groupNo}
+		<choose>
+			<when test="sessionLevel != 1">
+				AND member_no = #{memberNo}
+			</when>
+		</choose>
+		 ORDER BY group_no ASC LIMIT 1
+	</select>
+	<select id="prevGroupDetail" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT 
+			group_no as groupNo, 
+			group_name as groupName
+		FROM group_create
+		 WHERE #{groupNo} > group_no
+		 <choose>
+			<when test="sessionLevel != 1">
+				AND member_no = #{memberNo}
+			</when>
+		</choose>
+		 ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="prevGroupDetailCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create
+		WHERE #{groupNo} > group_no
+		<choose>
+			<when test="sessionLevel != 1">
+				AND member_no = #{memberNo}
+			</when>
+		</choose>
+		 ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="nextGroupDetail" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT 
+			group_no as groupNo, 
+			group_name as groupName
+		FROM group_create 
+		WHERE group_no > #{groupNo} 
+		<choose>
+			<when test="sessionLevel != 1">
+				AND member_no = #{memberNo}
+			</when>
+		</choose>
+		 ORDER BY group_no ASC LIMIT 1
+	</select>
+	<select id="groupdeleteSearchDateCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_delete
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN group_kind d
+		ON b.group_kind_no = d.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE group_expired_date >= #{startDate} AND #{endDate} > group_expired_date
+				AND d.member_no = #{memberNo}
+			</when>
+			<when test="sessionLevel == 1">
+			WHERE group_expired_date >= #{startDate} AND #{endDate} > group_expired_date
+			</when>
+		</choose>		
+	</select>
+	<select id="deleteGroupListSearchDate" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			a.group_no as groupNo,
+			a.group_expired_date as groupExpiredDate,
+			b.member_no as memberNo,
+			b.group_name as groupName,
+			c.member_name as memberName,
+			b.group_create_date as groupCreateDate,
+			d.group_kind_name as groupKindName
+		FROM group_delete a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN group_kind d
+		ON b.group_kind_no = d.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE group_expired_date >= #{startDate} AND #{endDate} > group_expired_date
+				AND d.member_no = #{memberNo}
+			</when>
+			<when test="sessionLevel == 1">
+			WHERE group_expired_date >= #{startDate} AND #{endDate} > group_expired_date
+			</when>
+		</choose>
+		ORDER BY group_expired_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupdeleteSearchKeyoptionCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_delete
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN group_kind d
+		ON b.group_kind_no = d.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE b.member_no = #{memberNo}
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR b.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR d.group_kind_name like CONCAT('%', #{keyWord}, '%')
+					 OR b.group_create_date like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND d.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupCreateDate'"> 
+					AND b.group_create_date like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR b.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR d.group_kind_name like CONCAT('%', #{keyWord}, '%')
+					 OR b.group_create_date like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND d.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupCreateDate'"> 
+					AND b.group_create_date like CONCAT('%', #{keyWord}, '%') 
+				</if>
+			</when>
+		</choose>	
+	</select>
+	<select id="deleteGroupListSearchKeyoption" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			a.group_no as groupNo,
+			a.group_expired_date as groupExpiredDate,
+			b.member_no as memberNo,
+			b.group_name as groupName,
+			c.member_name as memberName,
+			b.group_create_date as groupCreateDate,
+			d.group_kind_name as groupKindName
+		FROM group_delete a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN group_kind d
+		ON b.group_kind_no = d.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE b.member_no = #{memberNo}
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR b.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR d.group_kind_name like CONCAT('%', #{keyWord}, '%')
+					 OR b.group_create_date like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND d.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupCreateDate'"> 
+					AND b.group_create_date like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR b.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR d.group_kind_name like CONCAT('%', #{keyWord}, '%')
+					 OR b.group_create_date like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND d.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupCreateDate'"> 
+					AND b.group_create_date like CONCAT('%', #{keyWord}, '%') 
+				</if>
+			</when>
+		</choose>	
+		ORDER BY group_expired_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="deleteGroupList" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			a.group_no as groupNo,
+			a.group_expired_date as groupExpiredDate,
+			b.member_no as memberNo,
+			b.group_name as groupName,
+			c.member_name as memberName,
+			b.group_create_date as groupCreateDate,
+			d.group_kind_name as groupKindName
+		FROM group_delete a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN group_kind d
+		ON b.group_kind_no = d.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE c.member_no = #{memberNo}
+			</when>
+		</choose>
+		ORDER BY group_expired_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupdeleteSelectCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_delete
+	</select>
+		<select id="groupdeleteCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_delete
+	</select>
+	<select id="groupDeleteCheckMemberCount" parameterType="String" resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite_approval_result
+		WHERE group_name = #{groupName}
+	</select>
+	<select id="groupDeleteCheckgroupName" parameterType="String" resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			group_no as groupNo
+		FROM group_invite
+		WHERE group_name = #{groupName}
+	</select>
+	<select id="groupDeleteCheckgroupNo" parameterType="String" resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+			group_name as groupName
+		FROM group_create
+		WHERE group_no = #{groupNo}
+	</select>
+	<select id="groupDdayNo" parameterType="String" resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+		group_no as groupNo
+		FROM group_delete
+		WHERE group_Expired_date = #{groupExpiredDate}
+	</select>
+	<select id="groupDdaycheck" resultType="com.cafe24.blognyj9112.group.service.Group">
+		SELECT
+		 MIN(group_expired_date) as groupExpiredDate 
+		FROM group_delete
+	</select>
+	<insert id="deleteApproval" parameterType="com.cafe24.blognyj9112.group.service.Group">
+		INSERT INTO group_delete
+		(group_no, group_expired_date)
+		VALUES (
+			#{groupNo}, NOW()+Interval 1 Month
+		)
+	</insert>
+	<delete id="deleteGroupDelete"  parameterType="String">
+		DELETE 
+		FROM group_delete 
+		WHERE group_no = #{groupNo}
+	</delete>
+	 <delete id="deleteGroup"  parameterType="String">
+		DELETE 
+		FROM group_create 
+		WHERE group_no = #{groupNo}
+	</delete>
+	<select id="groupListSearchKeyoptionCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create a
+		INNER JOIN group_kind c
+		ON a.group_kind_no = c.group_kind_no		
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE d.member_no = #{memberNo}
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR a.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR c.group_kind_name like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND a.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'all'"> 
+					 WHERE a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR a.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR c.group_kind_name like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 WHERE a.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 WHERE c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+		</choose>			
+	</select>
+	<select id="groupListSearchKeyoption" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	 	SELECT
+			a.group_no as groupNo,
+			a.group_name as groupName,
+			a.group_info as groupInfo,
+			a.group_create_date as groupCreateDate,
+			c.group_kind_name as groupKindName
+		FROM group_create a		
+		INNER JOIN group_kind c
+		ON a.group_kind_no = c.group_kind_no	
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE d.member_no = #{memberNo}
+				<if test="keyOption == 'all'"> 
+					 AND a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR a.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR c.group_kind_name like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 AND a.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'all'"> 
+					 WHERE a.group_no like CONCAT('%', #{keyWord}, '%') 
+					 OR a.group_name like CONCAT('%', #{keyWord}, '%') 
+					 OR c.group_kind_name like CONCAT('%', #{keyWord}, '%')
+				</if> 
+				<if test="keyOption == 'groupName'"> 
+					 WHERE a.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 WHERE c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+		</choose>		
+		ORDER BY group_create_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupListSearchDateCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create a	
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE group_create_date >= #{startDate} AND #{endDate} > group_create_date
+				AND d.member_no = #{memberNo}
+			</when>
+			<when test="sessionLevel == 1">
+			WHERE group_create_date >= #{startDate} AND #{endDate} > group_create_date
+			</when>
+		</choose>	
+	</select>
+	<select id="groupListSearchDate" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	 	SELECT
+			a.group_no as groupNo,
+			a.group_name as groupName,
+			a.group_info as groupInfo,
+			a.group_create_date as groupCreateDate,
+			c.group_kind_name as groupKindName
+		FROM group_create a		
+		INNER JOIN group_kind c
+		ON a.group_kind_no = c.group_kind_no	
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE group_create_date >= #{startDate} AND #{endDate} > group_create_date
+				AND d.member_no = #{memberNo}
+			</when>
+			<when test="sessionLevel == 1">
+			WHERE group_create_date >= #{startDate} AND #{endDate} > group_create_date
+			</when>
+		</choose>		
+		ORDER BY group_create_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupList" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.Group">
+	 	SELECT
+			a.group_no as groupNo,
+			a.group_name as groupName,
+			a.group_info as groupInfo,
+			a.group_create_date as groupCreateDate,
+			c.group_kind_name as groupKindName
+		FROM group_create a		
+		INNER JOIN group_kind c
+		ON a.group_kind_no = c.group_kind_no	
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE d.member_no = #{memberNo}
+			</when>
+		</choose>		
+		ORDER BY group_create_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupListCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create a
+		<choose>
+			<when test="sessionLevel != 1">
+				INNER JOIN member d
+				ON a.member_no = d.member_no
+				WHERE d.member_no = #{memberNo}
+			</when>
+		</choose>	
+	</select>
+	<select id="modifyGroupResult"  
+				 parameterType="com.cafe24.blognyj9112.group.service.Group">
+	 	UPDATE group_create
+		SET	
+			group_kind_no = #{groupKindNo},
+			group_info = #{groupInfo},
+			group_create_date = now()
+	 	WHERE group_no = #{groupNo}
+	</select>	 
+	<select id="modifyGroup"  
+				 parameterType="String" 
+				 resultType="com.cafe24.blognyj9112.group.service.Group">
+	 	SELECT 
+	 		a.group_no as groupNo,
+	 		a.member_no as memberNo,
+	 		b.member_name as memberName,
+	 		b.member_id as memberId,
+			a.group_name as groupName,
+			a.group_info as groupInfo,
+			a.group_create_date as groupCreateDate,	
+			c.group_kind_name as groupKindName
+		FROM group_create a	
+		INNER JOIN member b
+		ON a.member_no = b.member_no	
+		INNER JOIN group_kind c
+		ON a.group_kind_no = c.group_kind_no	
+	 	WHERE group_no = #{groupNo}
+	</select>	
+	 <select id="checkGroupNameCount" parameterType="String"
+				 resultType="Integer">
+	 	SELECT 
+	 	COUNT(*)
+	 	FROM group_create
+	 	WHERE group_name = #{groupName}
+	 </select>
+	 <select id="groupNo" resultType="Integer">
+		SELECT
+		max(CAST(substring(group_no,7) AS DECIMAL))
+		FROM group_create
+	</select>
+	<select id="groupCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_create
+		
+	</select>
+	<insert id="addGroup" parameterType="com.cafe24.blognyj9112.group.service.Group">
+		INSERT INTO group_create (
+			group_no, group_kind_no, member_no, group_name, group_info, group_create_date
+			)
+			VALUES (
+			#{groupNo}, #{groupKindNo}, #{memberNo}, #{groupName}, #{groupInfo}, now()
+			)
+	</insert>
+</mapper>

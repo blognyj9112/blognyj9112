@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.bloodpressure.service.BloodPressureMapper">
+	<select id="bloodPressureNoCountToHealthScreen" parameterType="String" resultType="Integer">
+		SELECT 
+		count(*)
+		FROM health_screen
+		WHERE blood_pressure_no = #{bloodPressureNo}
+	</select>
+	<select id="bloodPressureSearchDateCount" 
+			parameterType="map" 
+			resultType="Integer">
+      	 SELECT
+			count(*)
+			FROM blood_pressure 
+			WHERE blood_pressure_date >= #{startDate} AND #{endDate} > blood_pressure_date
+			<choose>
+				<when test="sessionLevel != 1">
+					AND member_no = #{memberNo}
+				</when>
+			</choose>
+	</select>
+	<select id="bloodPressureSearchDate" 
+			parameterType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure" 
+			resultType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+      	 SELECT
+			blood_pressure_no as bloodPressureNo,
+			member_no as memberNo,
+			systolic_pressure as systolicPressure,
+			diastolic_pressure as diastolicPressure,
+			blood_pressure_date as bloodPressureDate
+			FROM blood_pressure  		
+			WHERE blood_pressure_date >= #{startDate} AND #{endDate} > blood_pressure_date
+			<choose>
+				<when test="sessionLevel != 1">
+					AND member_no = #{memberNo}
+				</when>
+			</choose>
+			ORDER BY blood_pressure_date DESC
+			LIMIT #{beginRow},#{pagePerRow}
+	</select> 
+	<select id="bloodPressurechart"
+		 parameterType="String"
+		resultType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+		SELECT 
+			systolic_pressure as systolicPressure,
+			diastolic_pressure as diastolicPressure,
+			blood_pressure_date as bloodPressureDate
+		FROM blood_pressure
+		WHERE member_no = #{memberNo}
+		AND blood_pressure_date > (NOW() - INTERVAL 30 DAY)
+		ORDER BY blood_pressure_date ASC
+	 </select>
+ 	 <select id="bloodPressureOne"
+			 parameterType="String"
+			resultType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+		SELECT
+			blood_pressure_no as bloodPressureNo,
+			systolic_pressure as systolicPressure,
+			diastolic_pressure as diastolicPressure,
+			blood_pressure_date as bloodPressureDate
+			FROM blood_pressure 		
+		WHERE blood_pressure_no = #{bloodPressureNo}
+	 </select>
+	 <update id="updateBloodPressure" parameterType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+		UPDATE blood_pressure
+		SET
+			systolic_pressure= #{systolicPressure},
+			diastolic_pressure= #{diastolicPressure},
+			blood_pressure_date = now()
+		WHERE blood_pressure_no = #{bloodPressureNo}
+	</update>
+	<delete id="deleteBloodPressure"  parameterType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+		DELETE FROM blood_pressure WHERE blood_pressure_no = #{bloodPressureNo}
+	</delete>
+	<select id="bloodPressureList" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+		SELECT
+			blood_pressure_no as bloodPressureNo,
+			member_no as memberNo,
+			systolic_pressure as systolicPressure,
+			diastolic_pressure as diastolicPressure,
+			blood_pressure_date as bloodPressureDate
+			FROM blood_pressure 	
+			<choose>
+				<when test="sessionLevel != 1">
+					WHERE member_no = #{memberNo}
+				</when>
+			</choose>
+			ORDER BY blood_pressure_date DESC
+			LIMIT #{beginRow},#{pagePerRow}
+	</select>
+ 	<select id="bloodPressureNo" resultType="Integer">
+		SELECT
+		IFNULL(MAX(CAST(SUBSTRING(blood_pressure_no,16)as decimal)),0) 
+		FROM blood_pressure
+	</select>
+	<select id="bloodPressureCount" parameterType="map" resultType="Integer">
+		SELECT
+		count(*)
+		FROM blood_pressure
+			<choose>
+				<when test="sessionLevel != 1">
+					WHERE member_no = #{memberNo}
+				</when>
+			</choose>
+	</select>
+	<insert id="addBloodPressure" 
+			parameterType="com.cafe24.blognyj9112.bloodpressure.service.BloodPressure">
+			
+	 	INSERT INTO blood_pressure (
+			blood_pressure_no, member_No, systolic_pressure, diastolic_pressure, blood_pressure_date
+			)
+			VALUES (
+			#{bloodPressureNo}, #{memberNo}, #{systolicPressure}, #{diastolicPressure}, now()
+			)
+	</insert> 
+</mapper>

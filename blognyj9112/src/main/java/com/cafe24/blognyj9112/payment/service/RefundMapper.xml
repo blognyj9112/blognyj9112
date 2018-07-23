@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.payment.service.RefundMapper">
+	<select id="nextrefundListDetailCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM refund
+		WHERE refund_no > #{refundNo}
+		ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="prevrefundListDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+		SELECT 
+			refund_no as refundNo, 
+			refund_title as refundTitle
+		FROM refund
+		WHERE #{refundNo} > refund_no
+		ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="prevrefundListDetailCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM refund
+		WHERE #{refundNo} > refund_no
+		ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="nextrefundListDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+		SELECT 
+			refund_no as refundNo, 
+			refund_title as refundTitle
+		FROM refund
+		WHERE refund_no > #{refundNo}
+		ORDER BY group_no DESC LIMIT 1
+	</select>
+	<select id="refundListDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+	 SELECT 
+		a.refund_no as refundNo, 
+		b.member_id as memberId,
+		b.member_name as memberName, 
+		a.refund_title as refundTitle, 
+		a.refund_content as refundContent, 
+		a.refund_sum as refundSum, 
+		a.refund_date as refundDate
+	FROM refund a
+	INNER JOIN member b
+	ON a.member_no = b.member_no
+	WHERE refund_no = #{refundNo}
+	ORDER BY refund_date DESC
+	</select>
+	<insert id="completeRefund" parameterType="com.cafe24.blognyj9112.payment.service.Refund">
+	INSERT INTO refund_complete
+	(refund_no, refund_complete_director_no, refund_complete_date)
+	VALUES (
+	#{refundNo}, #{refundCompleteDirectorNo}, NOW()
+	)
+	</insert>
+	<insert id="deniedRefund" parameterType="com.cafe24.blognyj9112.payment.service.Refund">
+	INSERT INTO refund_approval_result(
+	refund_no, refund_director_no, refund_approval, refund_approval_date)
+	VALUES (
+	#{refundNo}, #{refundDirectorNo}, 'F', NOW()
+	)
+	</insert>
+	<insert id="acceptRefund" parameterType="com.cafe24.blognyj9112.payment.service.Refund">
+	INSERT INTO refund_approval_result(
+	refund_no, refund_director_no, refund_approval, refund_approval_date)
+	VALUES (
+	#{refundNo}, #{refundDirectorNo}, 'T', NOW()
+	)
+	</insert>
+	<select id="refundNo" resultType="Integer">
+		SELECT
+		max(CAST(substring(refund_no,8) AS DECIMAL))
+		FROM refund
+	</select>
+	<insert id="addrefund" parameterType="com.cafe24.blognyj9112.payment.service.Refund">
+	INSERT INTO refund(
+	refund_no, member_no, refund_title, refund_content, refund_sum, refund_date
+	)
+	VALUES (
+	#{refundNo}, #{memberNo}, #{refundTitle}, #{refundContent}, #{refundSum}, NOW()
+	)
+	</insert>
+	<select id="refundCompleteTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM refund_complete
+	</select>
+	<select id="refundCompleteList" 
+			parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+		SELECT 
+			a.refund_complete_director_no as refundCompleteDirectorNo, 
+			a.refund_complete_date as refundCompleteDate,
+			b.refund_sum as refundSum,
+			c.member_id as memberId,
+			c.member_name as memberName,
+			d.refund_approval_date as refundApprovalDate
+		FROM refund_complete a
+		INNER JOIN refund b
+		ON a.refund_no = b.refund_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		INNER JOIN refund_approval_result d
+		ON a.refund_no = d.refund_no
+		ORDER BY refund_complete_date DESC
+
+	</select>
+	<select id="refundApprovalTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM refund_approval_result
+	</select>
+	<select id="refundApprovalList" 
+			parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+		SELECT  
+			a.refund_director_no as refundDirectorNo, 
+			a.refund_approval as refundApproval, 
+			a.refund_approval_date as refundApprovalDate,
+			b.refund_no as refundNo,
+			b.refund_sum as refundSum, 
+			b.refund_date as refundDate,
+			c.member_id as memberId,
+			c.member_name as memberName			
+		FROM refund_approval_result a
+		INNER JOIN refund b 
+		ON a.refund_no = b.refund_no
+		INNER JOIN member c
+		ON b.member_no = c.member_no
+		WHERE refund_approval = 'T'
+		ORDER BY refund_approval_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="refundTotalCount" resultType="Integer">
+		SELECT
+		count(*)
+		FROM refund
+	</select>
+	<select id="refundList" 
+			parameterType="Integer" 
+			resultType="com.cafe24.blognyj9112.payment.service.Refund">
+	 SELECT 
+		a.refund_no as refundNo, 
+		b.member_id as memberId,
+		b.member_name as memberName, 
+		a.refund_title as refundTitle, 
+		a.refund_content as refundContent, 
+		a.refund_sum as refundSum, 
+		a.refund_date as refundDate
+	FROM refund a
+	INNER JOIN member b
+	ON a.member_no = b.member_no
+	ORDER BY refund_date DESC
+	LIMIT #{beginRow},#{pagePerRow}
+	</select>
+</mapper>

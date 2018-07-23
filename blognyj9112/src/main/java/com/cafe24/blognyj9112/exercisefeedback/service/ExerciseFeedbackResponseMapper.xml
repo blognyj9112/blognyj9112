@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResponseMapper">
+ 	<select id="selectFoodFeedback" parameterType="String" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,
+			a.food_info_no as foodInfoNo,
+			a.ingestion_amount as ingestionAmount,
+			a.food_feedback_date as foodFeedbackDate,
+			b.food_name as foodName,
+			b.food_group as foodGroup
+		FROM food_feedback a
+		INNER JOIN food b
+		ON a.food_info_no = b.food_no
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+		ORDER BY food_feedback_date DESC 
+ 	</select>
+ 	<select id="selectExerciseFeedback" parameterType="String" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,
+			a.exercise_no as exerciseNo,
+			a.exercise_time as exerciseTime,
+			a.exercise_feedback_date as exerciseFeedbackDate,
+			b.exercise_name as exerciseName,
+			b.exercise_calorie as exerciseCalorie
+		FROM exercise_feedback a
+		INNER JOIN exercise b
+		ON a.exercise_no = b.exercise_no
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+		ORDER BY exercise_feedback_date DESC 
+ 	</select>
+ 	 <select id="selectFoodFeedbackCount" parameterType="String" resultType="Integer">
+ 		SELECT
+ 		count(*)
+ 		FROM food_feedback
+ 		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+ 	</select>
+ 	 <select id="selectExerciseFeedbackCount" parameterType="String" resultType="Integer">
+ 		SELECT
+ 		count(*)
+ 		FROM exercise_feedback
+ 		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+ 	</select>
+ 	<select id="resultTotalCount" resultType="Integer">
+ 		SELECT
+ 		count(*)
+ 		FROM exercise_feedback_request_result
+ 	</select>
+ 	<update id="updateEvaluationAverage" 
+ 			parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult" >
+ 	UPDATE member_teacher
+		SET
+			evaluation_average_grade= #{average}
+		WHERE member_no = #{teacherNo}
+ 	</update>
+ 	<select id="exerciseFeedbackSelectTeacherNo" parameterType="String" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+			a.teacher_no as memberNo,
+			c.member_id as memberId,
+			c.member_name as memberName,
+			b.evaluation_average_grade as evaluationAverageGrade
+		FROM exercise_feedback_request a
+		INNER JOIN member_teacher b
+		ON a.teacher_no = b.member_no
+		INNER JOIN member c
+		ON a.teacher_no = c.member_no
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+ 	</select>
+ 	<select id="exerciseFeedbackEvaluationConculate" parameterType="String" 
+ 			resultType="double">
+	 	SELECT 
+		AVG(a.exercise_feedback_evaluation_grade) as exerciseFeedbackEvaluationGrade
+		FROM exercise_feedback_evaluation a 
+		INNER JOIN exercise_feedback_request b 
+		ON a.exercise_feedback_request_no = b.exercise_feedback_request_no 
+		INNER JOIN member c 
+		ON b.teacher_no = c.member_no 
+		WHERE teacher_no = #{teacherNo}
+ 	</select>
+ 	<insert id="addexerciseFeedbackResponseResultevaluation"
+ 			 parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+ 		INSERT INTO exercise_feedback_evaluation
+		(exercise_feedback_request_no, exercise_feedback_evaluation_grade, exercise_feedback_evaluation_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, #{exerciseFeedbackEvaluationGrade}, NOW()
+		)
+ 	</insert>
+ 	<select id="exerciseFeedbackResponseResultevaluation" 
+ 			parameterType="String" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+		exercise_feedback_evaluation_grade as exerciseFeedbackEvaluationGrade,
+		exercise_feedback_evaluation_date as exerciseFeedbackEvaluationDate
+		FROM exercise_feedback_evaluation
+		WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+ 	</select>
+ 	<select id="exerciseFeedbackResponseResultevaluationCount" parameterType="String" resultType="Integer">
+	 	SELECT
+			count(*)
+		FROM exercise_feedback_evaluation
+		WHERE exercise_feedback_request_no=#{exerciseFeedbackRequestNo}
+ 	</select>
+ 	<select id="exerciseFeedbackResponseResultDetail"
+ 			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+ 		SELECT
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,
+			a.exercise_feedback_title as exerciseFeedbackTitle,
+			a.exercise_feedback_content as exerciseFeedbackContent,
+			a.exerciser_feedback_result_date as exerciseFeedbackResultDate,
+			c.member_id as memberId,
+			c.member_name as memberName,
+			b.teacher_no as teacherNo
+		FROM exercise_feedback_request_result a
+		INNER JOIN exercise_feedback_request b
+		ON a.exercise_feedback_request_no = b.exercise_feedback_request_no
+		INNER JOIN member c
+		ON b.teacher_no = c.member_no
+		WHERE a.exercise_feedback_request_no = #{exerciseFeedbackRequestNo}
+ 	</select>
+ 	<select id="nextExerciseFeedbackCount" parameterType="String" resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_request_result
+		WHERE exercise_feedback_request_no > #{exerciseFeedbackRequestNo}
+		 ORDER BY exercise_feedback_request_no ASC LIMIT 1
+	</select>
+	<select id="prevExerciseFeedbackDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+		SELECT 
+			exercise_feedback_request_no as exerciseFeedbackRequestNo, 
+			exercise_feedback_title as exerciseFeedbackTitle
+		FROM exercise_feedback_request_result
+		 WHERE #{exerciseFeedbackRequestNo} > exercise_feedback_request_no
+		 ORDER BY exercise_feedback_request_no DESC LIMIT 1
+	</select>
+	<select id="prevExerciseFeedbackDetailCount" parameterType="String" resultType="Integer">
+		SELECT
+		count(*)
+		FROM exercise_feedback_request_result
+		WHERE #{exerciseFeedbackRequestNo} > exercise_feedback_request_no
+		<choose>
+			<when test="sessionLevel != 1">
+				AND member_no = #{memberNo}
+			</when>
+		</choose>
+		 ORDER BY exercise_feedback_request_no DESC LIMIT 1
+	</select>
+	<select id="nextExerciseFeedbackDetail" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+		SELECT 
+			exercise_feedback_request_no as exerciseFeedbackRequestNo, 
+			exercise_feedback_title as exerciseFeedbackTitle
+		FROM exercise_feedback_request_result
+		WHERE exercise_feedback_request_no > #{exerciseFeedbackRequestNo}
+		 ORDER BY exercise_feedback_request_no ASC LIMIT 1
+	</select>
+ 	<select id="exerciseFeedbackResult" parameterType="map" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+			a.exercise_feedback_request_no as exerciseFeedbackRequestNo,
+			a.exercise_feedback_title as exerciseFeedbackTitle,
+			a.exerciser_feedback_result_date as exerciseFeedbackResultDate,
+			c.member_id as memberId,
+			c.member_name as memberName,
+			b.teacher_no as teacherNo
+		FROM exercise_feedback_request_result a
+		INNER JOIN exercise_feedback_request b
+		ON a.exercise_feedback_request_no = b.exercise_feedback_request_no
+		INNER JOIN member c
+		ON b.teacher_no = c.member_no
+		ORDER BY exerciser_feedback_result_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+ 	</select>
+ 	<delete id="deleteFoodFeedback" parameterType="String">
+	 	DELETE 
+			FROM food_feedback 
+			WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo} AND food_info_no =  #{foodInfoNo}
+ 	</delete>
+ 	<delete id="deleteExerciseFeedback" parameterType="String">
+	 	DELETE 
+			FROM exercise_feedback 
+			WHERE exercise_feedback_request_no = #{exerciseFeedbackRequestNo} AND exercise_no =  #{exerciseNo}
+ 	</delete>
+ 	<select id="foodGroupSelectOptionList" 
+ 			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+ 		SELECT DISTINCT food_group FROM food
+ 	</select> 	
+ 	<insert id="addExerciseFeedbackRequestResult" 
+ 			parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	INSERT INTO exercise_feedback_request_result
+		(exercise_feedback_request_no, exercise_feedback_title, exercise_feedback_content, exerciser_feedback_result_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, #{exerciseFeedbackTitle}, #{exerciseFeedbackContent}, NOW()
+		)
+ 	</insert>
+ 	<insert id="addFoodFeedback" 
+ 			parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	INSERT INTO food_feedback
+		(exercise_feedback_request_no, food_info_no, ingestion_amount, food_feedback_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, #{foodInfoNo}, #{ingestionAmount}, NOW()
+		)
+ 	</insert>
+ 	<select id="exerciseFeedbackRequestNo" resultType="Integer">
+		SELECT
+		IFNULL(MAX(CAST(SUBSTRING(exercise_feedback_request_no,26)as decimal)),0) 
+		FROM exercise_feedback
+	</select>
+ 	<insert id="addExerciseFeedback" 
+ 			parameterType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	INSERT INTO exercise_feedback
+		(exercise_feedback_request_no, exercise_no, exercise_time, exercise_feedback_date)
+		VALUES (
+		#{exerciseFeedbackRequestNo}, #{exerciseNo}, #{exerciseTime}, NOW()
+		)
+ 	</insert> 	
+ 	<select id="exerciseSearch" 
+		 	resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+	 	SELECT
+		exercise_no as exerciseNo,
+		exercise_name as exerciseName,
+		exercise_calorie as exerciseCalorie
+		FROM exercise
+ 	</select>
+ 	<select id="foodSearch" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.exercisefeedback.service.ExerciseFeedbackResult">
+		SELECT 
+			food_no as foodNo, 
+			food_group as foodGroup, 
+			food_name as foodName, 
+			food_once as foodOnece, 
+			food_kcal as foodKcal, 
+			food_carbohydrate as foodCarbohydrate, 
+			food_protein as foodProtein, 
+			food_fat as foodFat, 
+			food_sugar as foodSugar, 
+			food_natrium as foodNatrium, 
+			food_cholesterol as foodCholesterol, 
+			food_transfat as foodTransfat
+		FROM food
+		WHERE food_group = #{foodGroup} or food_no = #{foodNo}
+		<choose>
+			<when test="foodName != null"> 
+				AND food_name = #{foodName}
+			</when>
+		</choose>
+	</select> 
+</mapper>

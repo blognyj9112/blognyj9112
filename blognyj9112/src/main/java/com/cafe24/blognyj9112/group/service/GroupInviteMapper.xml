@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cafe24.blognyj9112.group.service.GroupInviteMapper">
+	<select id="groupNameFind" parameterType="String" resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		group_name as groupName
+		FORM group_create
+		WHERE group_no = ${groupNo}
+	</select>
+	<select id="addHistoryHealthSurvey" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupCalendar">
+		SELECT
+			a.group_name as groupName,
+			a.member_no as memberNo,
+			b.health_survey_result_no as healthSurveyResultNo,
+			b.health_survey_evaluation_do as healthSurveyEvaluationDo,
+			b.health_survey_result_date as healthSurveyResultDate,
+			c.member_name as memberName,
+			c.member_id as memeberId
+		FROM group_invite_approval_result a
+		INNER JOIN health_survey_result b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName} 
+		AND a.personal_information_approval = 'T'
+		ORDER BY health_survey_result_date DESC
+		LIMIT 0, 3
+	</select>
+	<select id="addHistoryHealthScreen" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupCalendar">
+			SELECT
+			a.group_name as groupName,
+			a.member_no as memberNo,
+			b.health_screen_no as healthScreenNo,
+			b.health_screen_date as healthScreenDate,
+			c.member_name as memberName,
+			c.member_id as memeberId
+		FROM group_invite_approval_result a
+		INNER JOIN health_screen b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName} 
+		AND a.personal_information_approval = 'T'	
+		ORDER BY health_screen_date DESC
+		LIMIT 0, 3
+	</select>
+	<select id="addHistoryMedication" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupCalendar">
+		SELECT
+	 <![CDATA[
+			a.group_name as groupName,
+			b.medication_no as medicationNo,
+			b.medication_start_date as medicationStartDate,
+			b.medication_end_date as medicationEndDate,
+			b.dosage as dosage,
+			b.medication_title as medicationTitle,
+			a.member_no as memberNo,
+			c.member_name as memberName,
+			c.member_id as memeberId		
+		FROM group_invite_approval_result a
+		INNER JOIN medication b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName}
+		AND a.personal_information_approval = 'T'
+		ORDER BY medication_date DESC
+		LIMIT 0, 3
+		]]>
+	</select>
+	<select id="addHistorytreatment" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupCalendar">
+		SELECT
+			a.group_name as groupName,
+			a.member_no as memberNo,
+			b.treatment_no as treatmentNo,
+			b.treatment_department as treatmentDepartment,
+			b.hospital_name as hospitalName,
+			b.treatment_title as treatmentTitle,
+			b.treatment_content as treatmentContent,
+			b.doctor_name as doctorName,
+			b.hospital_address as hospitalAddress,
+			b.treatment_date as tratmentDate,
+			c.member_name as memberName,
+			c.member_id as memeberId
+		FROM group_invite_approval_result a
+		INNER JOIN treatment b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName}
+		AND a.personal_information_approval = 'T'
+		ORDER BY treatment_date DESC
+		LIMIT 0, 3
+	</select>
+	<select id="detailGroupMainNameNo" parameterType="String" 
+				resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		 a.group_no as groupNo,
+		 a.group_info as groupInfo
+		FROM group_create a
+		INNER JOIN group_invite_approval_result b
+		ON a.group_name = b.group_name
+		WHERE a.group_name = #{groupName}
+		LIMIT 0,1
+	</select>
+	<select id="memberGroupJoinCheckCount" parameterType="String" 
+				resultType="Integer">
+		SELECT
+		 count(*)
+		FROM group_invite_approval_result
+		WHERE member_no = #{memberNo}
+	</select>
+	<select id="memberGroupJoinCheck" parameterType="String" 
+				resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		 group_name as groupName
+		FROM group_invite_approval_result
+		WHERE member_no = #{memberNo}
+	</select>
+	<delete id="deleteGroupMemberAll"  parameterType="String">
+	DELETE 
+		FROM group_invite_approval_result 
+		WHERE group_name = #{groupName}
+	</delete>
+	<select id="groupCalendarHealthSurvey" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+			a.group_name as groupName,
+			a.member_no as memberNo,
+			b.health_survey_result_no as healthSurveyResultNo,
+			b.health_survey_evaluation_do as healthSurveyEvaluationDo,
+			b.health_survey_result_date as healthSurveyResultDate,
+			c.member_name as memberName,
+			c.member_id as memeberId
+		FROM group_invite_approval_result a
+		INNER JOIN health_survey_result b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName} 
+		AND a.personal_information_approval = 'T'
+	</select>
+	<select id="groupCalendarHealthScreen" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+			a.group_name as groupName,
+			a.member_no as memberNo,
+			b.health_screen_no as healthScreenNo,
+			b.health_screen_date as healthScreenDate,
+			c.member_name as memberName,
+			c.member_id as memeberId
+		FROM group_invite_approval_result a
+		INNER JOIN health_screen b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName} 
+		AND a.personal_information_approval = 'T'
+	</select>
+	<select id="groupCalendartreatment" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	SELECT
+		a.group_name as groupName,
+		a.member_no as memberNo,
+		b.treatment_no as treatmentNo,
+		b.treatment_department as treatmentDepartment,
+		b.hospital_name as hospitalName,
+		b.treatment_title as treatmentTitle,
+		b.treatment_content as treatmentContent,
+		b.doctor_name as doctorName,
+		b.hospital_address as hospitalAddress,
+		b.treatment_date as tratmentDate,
+		c.member_name as memberName,
+		c.member_id as memeberId
+	FROM group_invite_approval_result a
+	INNER JOIN treatment b
+	ON a.member_no = b.member_no
+	INNER JOIN member c
+	ON a.member_no = c.member_no
+	WHERE a.group_name = #{groupName} 
+	AND a.personal_information_approval = 'T'
+	</select>
+	<select id="groupCalendarMedication" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	SELECT
+	 <![CDATA[
+			a.group_name as groupName,
+			b.medication_no as medicationNo,
+			b.medication_start_date as medicationStartDate,
+			b.medication_end_date as medicationEndDate,
+			b.dosage as dosage,
+			b.medication_title as medicationTitle,
+			a.member_no as memberNo,
+			c.member_name as memberName,
+			c.member_id as memeberId		
+		FROM group_invite_approval_result a
+		INNER JOIN medication b
+		ON a.member_no = b.member_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no
+		WHERE a.group_name = #{groupName}
+		AND a.personal_information_approval = 'T'
+		]]>
+	</select>
+	<delete id="groupInviteMemberCancle" 
+			parameterType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		DELETE 
+		FROM group_invite
+		WHERE group_invite_no = #{groupInviteNo}
+	</delete>
+	<delete id="outMember" 
+			parameterType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		DELETE 
+		FROM group_invite_approval_result 
+		WHERE member_no = #{memberNo}
+	</delete>
+	<select id="groupRelationGroupCreateMember" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		b.member_name as memberName,
+		b.member_no as memberNo
+		FROM group_create a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		WHERE group_name = #{groupName}
+	</select>
+	<select id="groupRelationMember" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		b.member_no as memberNo,
+		b.member_name as memberName,
+		b.member_id as memberId
+		FROM group_invite_approval_result a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		WHERE group_name = #{groupName}
+		ORDER BY group_invite_approval_date ASC
+	</select>
+	<select id="memberNameSearch" parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+			a.member_no as memberNo,
+			c.group_name as groupName,
+			c.group_no as groupNo,
+			b.member_name as memberName
+		FROM group_invite a
+		INNER JOIN member b
+		ON a.member_no = b.member_no
+		INNER JOIN group_create c
+		ON a.group_no = c.group_no
+		WHERE group_name = #{groupName}
+	</select>
+	<select id="groupMemberNo" resultType="Integer">
+		SELECT
+		member_no as memberNo
+		FROM group_invite_approval_result
+		WHERE group_name = #{groupName}	
+	</select>	
+	<select id="groupMembersListCountSearchKeyoption" parameterType="String" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_invite_approval_result
+		WHERE group_name = #{groupName}	
+			<if test="keyOption == 'groupInviteNo'"> 
+				 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'memberId'"> 
+				 AND b.member_id like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'memberName'"> 
+				 AND b.member_name like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'personalInformationApproval'"> 
+				 AND a.personal_information_approval like CONCAT('%', #{keyWord}, '%') 
+			</if>
+	</select>	
+	<select id="groupMembersListSearchKeyoption" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		a.group_invite_no as groupInviteNo,
+		a.group_name as groupName,
+		a.personal_information_approval as personalInformationApproval,
+		a.group_invite_approval_date as groupInviteApprovalDate,
+		b.member_name as memberName,
+		b.member_id as memberId,
+		c.group_no as groupNo
+		FROM group_invite_approval_result a 
+		INNER JOIN member b
+		ON a.member_no = b.member_no	
+		INNER JOIN group_invite c
+		ON a.group_invite_no = c.group_invite_no
+		WHERE c.group_name = #{groupName}	
+			<if test="keyOption == 'groupInviteNo'"> 
+				 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'memberId'"> 
+				 AND b.member_id like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'memberName'"> 
+				 AND b.member_name like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'personalInformationApproval'"> 
+				 AND a.personal_information_approval like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+		ORDER BY a.group_invite_no DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>	
+	<select id="groupMembersListSearchDateCount" parameterType="String" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_invite_approval_result
+		WHERE group_name = #{groupName}	
+		AND group_invite_approval_date >= #{startDate} AND #{endDate} > a.group_invite_approval_date
+	</select>	
+	<select id="groupMembersListSearchDate" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		a.group_invite_no as groupInviteNo,
+		a.group_name as groupName,
+		a.personal_information_approval as personalInformationApproval,
+		a.group_invite_approval_date as groupInviteApprovalDate,
+		b.member_name as memberName,
+		b.member_id as memberId,
+		c.group_no as groupNo
+		FROM group_invite_approval_result a 
+		INNER JOIN member b
+		ON a.member_no = b.member_no	
+		INNER JOIN group_invite c
+		ON a.group_invite_no = c.group_invite_no
+		WHERE c.group_name = #{groupName}	
+		AND a.group_invite_approval_date >= #{startDate} AND #{endDate} > a.group_invite_approval_date
+		ORDER BY a.group_invite_no DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupMembersListCount" parameterType="String" resultType="Integer">
+		SELECT
+		count(*)
+		FROM group_invite_approval_result
+		WHERE group_name = #{groupName}	
+	</select>	
+	<select id="groupMembersList" parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+		a.group_invite_no as groupInviteNo,
+		a.group_name as groupName,
+		a.personal_information_approval as personalInformationApproval,
+		a.group_invite_approval_date as groupInviteApprovalDate,
+		b.member_name as memberName,
+		b.member_id as memberId,
+		c.group_no as groupNo
+		FROM group_invite_approval_result a 
+		INNER JOIN member b
+		ON a.member_no = b.member_no	
+		INNER JOIN group_invite c
+		ON a.group_invite_no = c.group_invite_no
+		WHERE c.group_name = #{groupName}	
+		ORDER BY a.group_invite_no DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>	
+	<insert id="acceptGroupList" 
+			parameterType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	INSERT INTO group_invite_approval_result(
+	group_invite_no, member_no, group_name, personal_information_approval, group_invite_approval_date
+	)
+	VALUES (
+	#{groupInviteNo}, #{memberNo}, #{groupName},#{personalInformationApproval}, NOW()
+	)
+	</insert>
+	<select id="groupInviteNo" resultType="Integer">
+		SELECT
+		max(CAST(substring(group_invite_no,14) AS DECIMAL))
+		FROM group_invite
+	</select>
+	<insert id="inviteMember" 
+			parameterType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	INSERT INTO group_invite(
+	group_invite_no, group_no, member_no, group_invite_approval, group_invite_message, group_invite_date
+	)
+	VALUES (
+	#{groupInviteNo}, #{groupNo}, #{memberNo}, #{groupInviteApproval}, #{groupInviteMessage}, NOW()
+	)
+	</insert>	
+	<select id="groupInviteMemberName" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+			member_name as memberName,
+			member_no as memberNo,
+			member_agree as memberAgree
+		FROM member
+		WHERE member_id = #{memberId}	
+	</select>
+	<select id="personalAgreeSearch" 
+			parameterType="String" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+		SELECT
+			member_agree as personalInformationApproval
+		FROM member
+		WHERE member_no = #{memberNo}	
+	</select>
+	<select id="groupInviteMemberId" 
+			parameterType="String" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM member
+		WHERE member_id = #{memberId}	
+	</select>
+	<select id="totalCountInvite" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite
+	</select>
+	<select id="inviteGroupListSearchKeyoptiontotalCount" parameterType="map" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+		</choose>
+	</select>
+	<select id="inviteGroupListSearchKeyoption" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+	 		a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.member_no as memberNo,
+			a.group_invite_date as groupInviteDate,
+			a.group_invite_message as groupInviteMessage,
+			b.group_name as groupName,
+			b.group_Info as groupInfo,			
+			c.group_kind_name as groupKindName
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+			<when test="sessionLevel == 1">
+				<if test="keyOption == 'groupName'"> 
+					 AND b.group_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+				<if test="keyOption == 'groupKindName'"> 
+					 AND c.group_kind_name like CONCAT('%', #{keyWord}, '%') 
+				</if> 
+			</when>
+		</choose>
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="inviteGroupListSearchDatetotalCount" parameterType="map" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+				group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+			</when>
+			<when test="sessionLevel == 1">
+				group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+			</when>
+		</choose>
+	</select>
+	<select id="inviteGroupListSearchDate" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+	 		a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.member_no as memberNo,
+			a.group_invite_date as groupInviteDate,
+			a.group_invite_message as groupInviteMessage,
+			b.group_name as groupName,
+			b.group_Info as groupInfo,			
+			c.group_kind_name as groupKindName
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+				group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+			</when>
+			<when test="sessionLevel == 1">
+				group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+			</when>
+		</choose>
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="inviteGroupListtotalCount" parameterType="map" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+			</when>
+		</choose>
+	</select>
+	<select id="inviteGroupList" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+	 		a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.member_no as memberNo,
+			a.group_invite_date as groupInviteDate,
+			a.group_invite_message as groupInviteMessage,
+			b.group_name as groupName,
+			b.group_Info as groupInfo,			
+			c.group_kind_name as groupKindName
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no		
+		INNER JOIN group_kind c
+		ON b.group_kind_no = c.group_kind_no
+		<choose>
+			<when test="sessionLevel != 1">
+				WHERE a.member_no = #{memberNo}
+			</when>
+		</choose>
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupInviteListSearchKeyoptiontotalCount" 
+				parameterType="map" 
+				resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite
+		WHERE group_no = ${groupNo}
+		<if test="keyOption == 'all'"> 
+			 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+			 OR c.member_id like CONCAT('%', #{keyWord}, '%') 
+			 OR a.group_invite_approval like CONCAT('%', #{keyWord}, '%')
+			 OR c.member_name like CONCAT('%', #{keyWord}, '%')
+		</if> 
+		<if test="keyOption == 'memberName'"> 
+			 AND c.member_name like CONCAT('%', #{keyWord}, '%') 
+		</if> 
+		<if test="keyOption == 'groupInviteNo'"> 
+			 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+		</if> 
+		<if test="keyOption == 'memberId'"> 
+			 AND c.member_id like CONCAT('%', #{keyWord}, '%') 
+		</if> 
+		<if test="keyOption == 'groupInviteApproval'"> 
+			AND a.group_invite_approval like CONCAT('%', #{keyWord}, '%') 
+		</if> 
+	</select>
+	<select id="groupInviteListSearchKeyoption" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+			b.group_name as groupName,
+			c.member_no as memberNo,
+			a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.group_invite_approval as groupInviteApproval,
+			a.group_invite_date as groupInviteDate,
+			c.member_name as memberName,
+			c.member_id as memberId
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no	
+		WHERE a.group_no = ${groupNo}
+			<if test="keyOption == 'all'"> 
+				 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+				 OR c.member_id like CONCAT('%', #{keyWord}, '%') 
+				 OR a.group_invite_approval like CONCAT('%', #{keyWord}, '%')
+				 OR c.member_name like CONCAT('%', #{keyWord}, '%')
+			</if> 
+			<if test="keyOption == 'memberName'"> 
+				 AND c.member_name like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'groupInviteNo'"> 
+				 AND a.group_invite_no like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'memberId'"> 
+				 AND c.member_id like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+			<if test="keyOption == 'groupInviteApproval'"> 
+				AND a.group_invite_approval like CONCAT('%', #{keyWord}, '%') 
+			</if> 
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupInviteListSearchDatetotalCount" 
+			parameterType="map" 
+			resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite
+		WHERE a.group_no = ${groupNo}
+		AND group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+	</select>
+	<select id="groupInviteListSearchDate" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+			b.group_name as groupName,
+			c.member_no as memberNo,
+			a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.group_invite_approval as groupInviteApproval,
+			a.group_invite_date as groupInviteDate,
+			c.member_name as memberName,
+			c.member_id as memberId
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no	
+		WHERE a.group_no = ${groupNo}
+		AND group_invite_date >= #{startDate} AND #{endDate} > group_invite_date
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+	<select id="groupInviteListtotalCount" 
+				parameterType="String" 
+				resultType="Integer">
+		SELECT
+			count(*)
+		FROM group_invite
+		WHERE group_no = ${groupNo}
+	</select>
+	<select id="groupInviteList" 
+			parameterType="map" 
+			resultType="com.cafe24.blognyj9112.group.service.GroupInvite">
+	 	SELECT
+			a.group_invite_no as groupInviteNo,
+			a.group_no as groupNo,
+			a.group_invite_approval as groupInviteApproval,
+			a.group_invite_date as groupInviteDate,
+			c.member_name as memberName,
+			c.member_no as memberNo,
+			c.member_id as memberId
+		FROM group_invite a
+		INNER JOIN group_create b
+		ON a.group_no = b.group_no
+		INNER JOIN member c
+		ON a.member_no = c.member_no	
+		WHERE a.group_no = ${groupNo}
+		ORDER BY group_invite_date DESC
+		LIMIT #{beginRow},#{pagePerRow}
+	</select>
+</mapper>
